@@ -76,8 +76,10 @@ You can see with compression on, `BYTES IN` peaked at `618.3KB/S`:
 
 ![System Network](img/system-network-snappy.png)
 
-With compression off, `BYTES IN` peaked at `1.34MB/S`, which is over a 50% improvement:
+With compression off, `BYTES IN` peaked at `1.34MB/S`. 
 
 ![System Network](img/system-network-no-compression.png)
+
+Bottom line, compression reduced Network traffic by over 50%. 
 
 
