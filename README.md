@@ -15,7 +15,10 @@ This repository contains a tuneable Python script, [write-to-mongo.py](write-to-
 ### Compression Library
 Snappy compression in Python requires the python-snappy package.
 
-```pip3 install python-snappy```
+```ZSH
+pip3 install python-snappy
+pip3 install faker          # Used for data generation
+```
 
 ### Client Configration
 
@@ -54,7 +57,7 @@ Now: 2021-08-31 12:25:33.090209
 
 ## Measurement
 
-The are a couple of options for measuring network traffic. If you're using Atlas, it has a System Network metric that will demonstrate the differences between the 2 runs nicely:
+The are a couple of options for measuring network traffic. If you're using Atlas, it has a System Network metric that will demonstrate the differences between the 2 runs nicely.
 
 The two screen captures below represent the same period of time. The two peaks represent the two executions of the script: first with compression on, then off.
 
