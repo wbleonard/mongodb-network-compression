@@ -1,14 +1,14 @@
 # MongoDB Network Compression
 
-An under advertised feature of MongoDB is it's ability to compress data between the client and the server. Close has a really [nice article](https://making.close.com/posts/mongodb-network-compression}) on how compression reduced their network traffic from about 140 Mbps to 65 Mpbs. As Close notes, with cloud data transfer costs ranging from $0.01 per GB and up, you can get a nice little savings with a simple configuration change. 
+An under advertised feature of MongoDB is its ability to compress data between the client and the server. The CRM company Close has a really [nice article](https://making.close.com/posts/mongodb-network-compression) on how compression reduced their network traffic from about 140 Mbps to 65 Mpbs. As Close notes, with cloud data transfer costs ranging from $0.01 per GB and up, you can get a nice little savings with a simple configuration change. 
 
 MongoDB supports the following compressors:
 
-* [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy})
-* [zlib](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib]) (Available starting in MongoDB 3.6)
+* [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy)
+* [zlib](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 3.6)
 * [zstd](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 4.2)
 
-This repository contains a tuneable Python script that you can use to see the impact of network compression yourself. The initial iteration uses [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy}).
+This repository contains a tuneable Python script, [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. The initial iteration uses [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy).
 
 ## Setup
 
@@ -30,7 +30,7 @@ compressor = 'snappy'
 
 Using the default settings, the script will insert records in batches of 10,000 for 60 seconds.
 
-```PYTHON
+```ZSH
 ✗ python3 write-to-mongo.py
 
 MongoDB Network Compression Test
@@ -58,11 +58,11 @@ The are a couple of options for measuring network traffic. If you're using Atlas
 
 The two screen captures below represent the same period of time. The two peaks represent the two executions of the script: first with compression on, then off.
 
-You can see with compression on, `BYTES IN` peaked at 618.3KB/S:
+You can see with compression on, `BYTES IN` peaked at `618.3KB/S`:
 
 ![System Network](img/system-network-snappy.png)
 
-With compression off, `BYTES IN` peaked at 1.34MB/S, which is over a 50% improvement:
+With compression off, `BYTES IN` peaked at `1.34MB/S`, which is over a 50% improvement:
 
 ![System Network](img/system-network-no-compression.png)
 
