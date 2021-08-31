@@ -8,7 +8,18 @@ MongoDB supports the following compressors:
 * [zlib](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 3.6)
 * [zstd](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 4.2)
 
+Enabling compression from the client simply involves installing the desired compression library and then passing the desired compressor as an argument when you connect to MongoDB. For example:
+
+```PYTHON
+client = MongoClient('mongodb://localhost', compressors='snappy')
+```
+
+
 This repository contains a tuneable Python script, [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. The initial iteration uses [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy).
+
+
+
+
 
 ## Setup
 
@@ -20,9 +31,9 @@ pip3 install python-snappy
 pip3 install faker          # Used for data generation
 ```
 
-### Client Configration
+### Client Configuration
 
-Edit [params.py](params.py) and at a minimum, set your connection string. The other setting of iterest is the compressors:
+Edit [params.py](params.py) and at a minimum, set your connection string. The other setting of interest is the compressors:
 
 ``` PYTHON
 # Set to an empty string to turn off compression
