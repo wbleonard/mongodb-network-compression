@@ -80,6 +80,6 @@ With compression off, `BYTES IN` peaked at `1.34MB/S`.
 
 ![System Network](img/system-network-no-compression.png)
 
-Bottom line, compression reduced Network traffic by over 50%. 
+Bottom line, compression reduced Network traffic by over 50%, which is in line with the improvement seen by Close. 
 
 
