@@ -2,6 +2,8 @@
 
 An under advertised feature of MongoDB is its ability to compress data between the client and the server. The CRM company Close has a really [nice article](https://making.close.com/posts/mongodb-network-compression) on how compression reduced their network traffic from about 140 Mbps to 65 Mpbs. As Close notes, with cloud data transfer costs ranging from $0.01 per GB and up, you can get a nice little savings with a simple configuration change. 
 
+![mongodb-network-compression-chart](img/mongodb-network-compression-chart.webp)
+
 MongoDB supports the following compressors:
 
 * [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy)
@@ -26,10 +28,13 @@ This repository contains a tuneable Python script, [write-to-mongo.py](write-to-
 ### Compression Library
 Snappy compression in Python requires the python-snappy package.
 
-```ZSH
-pip3 install python-snappy
-pip3 install faker          # Used for data generation
-```
+```pip3 install python-snappy```
+
+### Data Generator
+[Faker](https://faker.readthedocs.io/en/master/) is a Python package that is used to generate fake data for this test.
+
+```pip3 install faker ```
+
 
 ### Client Configuration
 
@@ -42,44 +47,73 @@ compressor = 'snappy'
 
 ## Execution
 
-Using the default settings, the script will insert records in batches of 10,000 for 60 seconds.
+Using the default settings, the script will insert 10 MB of data in batches of 1 MB.
 
 ```ZSH
 ✗ python3 write-to-mongo.py
 
 MongoDB Network Compression Test
 Network Compression: Snappy
-Now: 2021-08-31 12:25:33.090209
+Now: 2021-09-01 11:32:34.939621
 
-10000 records inserted in 5.25 seconds =  1907 records/second
-20000 records inserted in 11.69 seconds =  1711 records/second
-30000 records inserted in 18.29 seconds =  1640 records/second
-40000 records inserted in 23.37 seconds =  1712 records/second
-50000 records inserted in 28.41 seconds =  1760 records/second
-60000 records inserted in 34.17 seconds =  1756 records/second
-70000 records inserted in 39.34 seconds =  1779 records/second
-80000 records inserted in 44.46 seconds =  1800 records/second
-90000 records inserted in 49.53 seconds =  1817 records/second
-100000 records inserted in 55.04 seconds =  1817 records/second
-110000 records inserted in 60.57 seconds =  1816 records/second
+Bytes to insert: 10 MB
+Insert batch size 1 MB
 
-110000 records inserted in 61.0 seconds
+1 megabytes inserted at 510.7 kilobytes/second
+2 megabytes inserted at 527.8 kilobytes/second
+3 megabytes inserted at 564.9 kilobytes/second
+4 megabytes inserted at 572.4 kilobytes/second
+5 megabytes inserted at 577.6 kilobytes/second
+6 megabytes inserted at 593.1 kilobytes/second
+7 megabytes inserted at 585.5 kilobytes/second
+8 megabytes inserted at 594.7 kilobytes/second
+9 megabytes inserted at 600.4 kilobytes/second
+10 megabytes inserted at 607.4 kilobytes/second
+
+ 27778 records inserted in 16.0 seconds
+
+ MongoDB Server Reported Megabytes In: 11.323 MB
 ```
+
+Here's the same run without compression:
+
+```zsh
+✗ python3 write-to-mongo.py
+
+MongoDB Network Compression Test
+Network Compression: Off
+Now: 2021-09-01 11:31:43.489983
+
+Bytes to insert: 10 MB
+Insert batch size 1 MB
+1 megabytes inserted at 453.2 kilobytes/second
+2 megabytes inserted at 473.1 kilobytes/second
+3 megabytes inserted at 482.3 kilobytes/second
+4 megabytes inserted at 453.4 kilobytes/second
+5 megabytes inserted at 444.7 kilobytes/second
+6 megabytes inserted at 464.9 kilobytes/second
+7 megabytes inserted at 482.5 kilobytes/second
+8 megabytes inserted at 497.4 kilobytes/second
+9 megabytes inserted at 510.9 kilobytes/second
+10 megabytes inserted at 523.8 kilobytes/second
+
+ 27778 records inserted in 19.0 seconds
+
+ MongoDB Server Reported Megabytes In: 19.963 MB
+ ```
 
 ## Measurement
 
-The are a couple of options for measuring network traffic. If you're using Atlas, it has a System Network metric that will demonstrate the differences between the 2 runs nicely.
+There are a couple of options for measuring network traffic. 
 
-The two screen captures below represent the same period of time. The two peaks represent the two executions of the script: first with compression on, then off.
+The MongoDB serverStatus [network](https://docs.mongodb.com/manual/reference/command/serverStatus/#network) document reports on network use.
 
-You can see with compression on, `BYTES IN` peaked at `618.3KB/S`:
+You can see from the tests above, inserting 10 MBs of data using the `snappy` compressor reported `11.323 MB In`. With no compression, the same 10 MBs of data consumed `19.963 MB`.
 
-![System Network](img/system-network-snappy.png)
+_If you're wondering why the reported numbers are double the data inserted, that's due to other workloads running on the server, and the TCP packet being larger than just the data. Focus on the delta between the 2 tests runs._
 
-With compression off, `BYTES IN` peaked at `1.34MB/S`. 
+Another option would be using a network analysis tool like [Wireshark](https://www.wireshark.org/). But that's beyond the scope of this article for now.
 
-![System Network](img/system-network-no-compression.png)
-
-Bottom line, compression reduced Network traffic by over 50%, which is in line with the improvement seen by Close. 
+Bottom line, compression reduced Network traffic by about 50%, which is in line with the improvement seen by Close. 
 
 
