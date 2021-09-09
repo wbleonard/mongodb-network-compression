@@ -4,18 +4,24 @@ import time
 from datetime import datetime
 from pymongo import MongoClient
 from faker import Faker
+import argparse
+
+# Process arguments
+parser = argparse.ArgumentParser(description='MongoDB Network Compression Test')
+parser.add_argument('-c', '--compressor', help="The compressor to use.", 
+    choices=["snappy", 'zlib', 'zstd'])
+args = parser.parse_args()
 
 print("\nMongoDB Network Compression Test")
 
 # Establish connection to MongoDB
-
-if params.compressor == '':
+if args.compressor is None:
     client = MongoClient(params.target_conn_string)
     print ('Network Compression: Off')
 else:
     # https://pymongo.readthedocs.io/en/stable/api/pymongo/mongo_client.html?highlight=compression#pymongo.mongo_client.MongoClient
-    client = MongoClient(params.target_conn_string, compressors='snappy')
-    print('Network Compression: Snappy')
+    client = MongoClient(params.target_conn_string, compressors=args.compressor, zlibCompressionLevel=9)
+    print('Network Compression: ' + args.compressor)
     
 print("Now:", datetime.now(), "\n")
 
@@ -35,7 +41,7 @@ t_start = time.time()
 customers = []  # customers array for bulk insert
 
 print ("Bytes to insert: {} MB".format(params.megabytes_to_insert))
-print ("Bulk insert batch size {} MB\n".format(params.batch_size_mb))
+print ("Bulk insert batch size: {} MB\n".format(params.batch_size_mb))
 
 # Convert parameter to bytes
 bytes_to_insert = params.megabytes_to_insert*1000*1000

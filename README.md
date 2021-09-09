@@ -10,7 +10,7 @@ MongoDB supports the following compressors:
 * [zlib](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 3.6)
 * [zstd](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 4.2)
 
-Enabling compression from the client simply involves installing the desired compression library and then passing the desired compressor as an argument when you connect to MongoDB. For example:
+Enabling compression from the [client](https://pymongo.readthedocs.io/en/stable/api/pymongo/mongo_client.html) simply involves installing the desired compression library and then passing the desired compressor as an argument when you connect to MongoDB. For example:
 
 ```PYTHON
 client = MongoClient('mongodb://localhost', compressors='snappy')
@@ -26,7 +26,7 @@ This repository contains a tuneable Python script, [write-to-mongo.py](write-to-
 ## Setup
 
 ### Compression Library
-Snappy compression in Python requires the python-snappy package.
+Snappy compression in Python requires the `python-snappy` package.
 
 ```pip3 install python-snappy```
 
@@ -38,22 +38,24 @@ Snappy compression in Python requires the python-snappy package.
 
 ### Client Configuration
 
-Edit [params.py](params.py) and at a minimum, set your connection string. The other setting of interest is the compressors:
+Edit [params.py](params.py) and at a minimum, set your connection string. Other tunables include the amount of bytes to insert (default 10 MB) and the batch insert size (1 MB):
 
 ``` PYTHON
-# Set to an empty string to turn off compression
-compressor = 'snappy'
+drop_collection = True    # Drop collection on run
+megabytes_to_insert = 10
+batch_size_mb = 1         # Batch size of bulk insert in megabytes
 ```
 
 ## Execution
 
-Using the default settings, the script will insert 10 MB of data in batches of 1 MB.
+The script accepts an optional compression argument, that must be either `snappy`, `zlib` or `zstd`:
+
 
 ```ZSH
-✗ python3 write-to-mongo.py
+✗ python3 write-to-mongo.py -c snappy
 
 MongoDB Network Compression Test
-Network Compression: Snappy
+Network Compression: snappy
 Now: 2021-09-01 11:32:34.939621
 
 Bytes to insert: 10 MB
@@ -86,6 +88,7 @@ Now: 2021-09-01 11:31:43.489983
 
 Bytes to insert: 10 MB
 Insert batch size 1 MB
+
 1 megabytes inserted at 453.2 kilobytes/second
 2 megabytes inserted at 473.1 kilobytes/second
 3 megabytes inserted at 482.3 kilobytes/second
