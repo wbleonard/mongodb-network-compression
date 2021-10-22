@@ -17,18 +17,20 @@ client = MongoClient('mongodb://localhost', compressors='snappy')
 ```
 
 
-This repository contains a tuneable Python script, [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. The initial iteration uses [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy).
-
-
-
+This repository contains a tuneable Python script, [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. This example uses [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy), but you can easily also use [zlib](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) and [zstd](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib).
 
 
 ## Setup
 
 ### Compression Library
-Snappy compression in Python requires the `python-snappy` package.
+The Snappy compression in Python requires the `python-snappy` package.
 
 ```pip3 install python-snappy```
+
+The zstd compression requires the zstandard package
+
+```pip3 install zstandard```
+
 
 ### Data Generator
 [Faker](https://faker.readthedocs.io/en/master/) is a Python package that is used to generate fake data for this test.
