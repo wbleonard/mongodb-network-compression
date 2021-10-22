@@ -23,11 +23,11 @@ This repository contains a tuneable Python script, [write-to-mongo.py](write-to-
 ## Setup
 
 ### Compression Library
-The Snappy compression in Python requires the `python-snappy` package.
+The `snappy` compression in Python requires the `python-snappy` package.
 
 ```pip3 install python-snappy```
 
-The zstd compression requires the zstandard package
+The `zstd` compression requires the zstandard package
 
 ```pip3 install zstandard```
 
