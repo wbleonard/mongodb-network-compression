@@ -23,13 +23,15 @@ This repository contains a tuneable Python script, [write-to-mongo.py](write-to-
 ## Setup
 
 ### Compression Library
-The `snappy` compression in Python requires the `python-snappy` package.
+The [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy) compression in Python requires the `python-snappy` package.
 
 ```pip3 install python-snappy```
 
-The `zstd` compression requires the zstandard package
+The [zstd](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) compression requires the zstandard package
 
 ```pip3 install zstandard```
+
+The [zlib](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) compression is native to Python.
 
 
 ### Data Generator
