@@ -121,7 +121,7 @@ Bulk read size: 100 records
 
  MongoDB Server Reported Megabytes Out: 105.535 MB
 ```
-With `snappy` compression, our reported bytes out about 86 MBs fewer. That's a 45% savings. But wait, the 10 MBs of data was read in 10 fewer seconds. That's a 32% performance boost!
+With `snappy` compression, our reported bytes out about `86 MBs` fewer. That's a `45%` savings. But wait, the `10 MBs` of data was read in `10` fewer seconds. That's a `32%` performance boost!
 
 Let's try this again using `zlib`. 
 
@@ -191,8 +191,6 @@ Bulk insert batch size: 1 MB
 
 So it took `16` seconds to write `27,778` records. Let's run the same test with `snappy` compression:
 
-
-
 ```zsh
 ✗ python3 write-to-mongo.py -c 'snappy'
 
@@ -221,16 +219,10 @@ Bulk insert batch size: 1 MB
 Our reported megabytes in reduced by `49%`. However, our write performance only decreased by `1 second (6%)`. Not as great as with the read performance, but still worth a look. 
 ## Measurement
 
-There are a couple of options for measuring network traffic. 
-
-The MongoDB serverStatus [network](https://docs.mongodb.com/manual/reference/command/serverStatus/#network) document reports on network use.
-
-You can see from the tests above, inserting 10 MBs of data using the `snappy` compressor reported `11.323 MB In`. With no compression, the same 10 MBs of data consumed `19.963 MB`.
-
-_If you're wondering why the reported numbers are double the data inserted, that's due to other workloads running on the server, and the TCP packet being larger than just the data. Focus on the delta between the 2 tests runs._
+There are a couple of options for measuring network traffic. This script is using the [db.serverStatus()](https://docs.mongodb.com/manual/reference/method/db.serverStatus/) `physicalBytesOut` and `physicalBytesIn`, reporting on the delta between the readingd at the start and end of the test run. 
 
 Another option would be using a network analysis tool like [Wireshark](https://www.wireshark.org/). But that's beyond the scope of this article for now.
 
-Bottom line, compression reduced Network traffic by about 50%, which is in line with the improvement seen by Close. 
+Bottom line, compression reduced Network traffic by about 50%, which is in line with the improvement seen by Close. More importantly, compression had a dramatic improvement on read performance. That's a Win-Win.
 
 

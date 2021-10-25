@@ -2,7 +2,7 @@ target_conn_string = 'mongodb://localhost'
 
 # Tunables
 
-# Read to Mongo
+# Read from Mongo
 target_read_database        = 'sample_airbnb'
 target_read_collection      = 'listingsAndReviews'
 megabytes_to_read           = 10
