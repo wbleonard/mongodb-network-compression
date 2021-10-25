@@ -25,8 +25,8 @@ else:
     
 print("Now:", datetime.now(), "\n")
 
-db = client[params.target_database]
-collection = db[params.target_collection]
+db = client[params.target_write_database]
+collection = db[params.target_write_collection]
 
 ## TODO: Add measurement using db.serverStat().network.bytesIn
 bytesIn_start = db.command({'serverStatus' :1})["network"]["physicalBytesIn"]
