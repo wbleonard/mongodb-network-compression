@@ -1,5 +1,6 @@
 package com.mongodb.java.bootstrap;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoClients;
 
 import java.sql.Date;
@@ -33,18 +34,18 @@ public class App {
 
         // Grab the connection string from the environment:
         String uriString = System.getenv("mongodbURI");
-        String databaseString = System.getenv("target_read_dabase");
-        String collectionString = System.getenv("target_read_collection");
+        String databaseString = System.getenv("targetReadDatabase");
+        String collectionString = System.getenv("targetReadCollection");
         String compressor = System.getenv("compressor");
         int megabytesToRead = Integer.parseInt(System.getenv("megabytesToRead"));
         int recordBatchSize = Integer.parseInt(System.getenv("recordBatchSize"));
 
         if (uriString == null) {
-            System.out.format("%nMongoDB Connection String environment variable, 'mongodb_uri', is not set");
+            System.out.format("%nMongoDB Connection String environment variable, 'mongodbURI', is not set");
             return;
         }
 
-        if (compressor == null) {
+        if (compressor == null || compressor.isEmpty()) {
             System.out.format("%nNetwork Compression: Off");
             uriString = uriString + "&appName=Java Network Compress Test with no compressor";
         } else {
@@ -64,11 +65,12 @@ public class App {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         System.out.format("%nNow: %s", df.format(currentDate));
 
-        // The Java Driver doesn't appear to report ["network"]["physicalBytesOut"]
-        // BasicDBObject serverStatus = new BasicDBObject();
-        // serverStatus.put("ServerStatus", "1");
-        // Document bytesOut_start = database.runCommand(serverStatus);
-        // System.out.println("\n" + bytesOut_start.get("network") + "\n");
+        // Get physical network bytes out at the start of th test
+        BasicDBObject dbObject = new BasicDBObject();
+        dbObject.put("serverStatus", "1");
+        Document serverStatus = database.runCommand(dbObject);
+        Document network = (Document) serverStatus.get("network");
+        long physicalBytesOutStart = network.getLong("physicalBytesOut");
 
         // https://mongodb.github.io/mongo-java-driver/4.4/apidocs/mongodb-driver-core/com/mongodb/MongoCompressor.html
 
@@ -92,7 +94,7 @@ public class App {
                 // MongoCursor<Document> cursor =
                 // collection.find().limit(recordBatchSize).batchSize(recordBatchSize)
                 // .iterator();
-
+                // MongoCursor<Document> cursor = collection.find().batchSize(recordBatchSize).iterator();
                 MongoCursor<Document> cursor = collection.find().iterator();
 
                 try {
@@ -103,26 +105,22 @@ public class App {
                         bytesRead += recordSize;
                         readCount++;
 
-                        // If the modulus falls in the range of the batch size, report the results:
-                        //if (readCount % recordBatchSize == 0) {
+                        // But only print per megabyte read
+                        long currentTimeMillis = System.currentTimeMillis();
+                        long totalTimeMillis = currentTimeMillis - startTimeMillis;
+                        long megabytesRead = bytesRead / 1000 / 1000;
 
-                            // But only print per megabyte read
-                            long currentTimeMillis = System.currentTimeMillis();
-                            long totalTimeMillis = currentTimeMillis - startTimeMillis;
-                            long megabytesRead = bytesRead / 1000 / 1000;
+                        if (megabytesRead > previousMegabytesRead) {
+                            double kilobytesRead = ((double) bytesRead / 1000);
+                            double kilobytesPerSecond = ((double) (kilobytesRead / ((double) totalTimeMillis / 1000)));
+                            System.out.format("%n%d megabytes read at %.3f kilobytes/second", megabytesRead,
+                                    kilobytesPerSecond);
+                            previousMegabytesRead = megabytesRead;
+                        }
 
-                            if (megabytesRead > previousMegabytesRead) {
-                                double kilobytesRead = ((double) bytesRead / 1000);
-                                double kilobytesPerSecond = ((double) (kilobytesRead / ((double) totalTimeMillis / 1000)));
-                                System.out.format("%n%d megabytes read at %.3f kilobytes/second", megabytesRead, kilobytesPerSecond);
-                                previousMegabytesRead = megabytesRead;
-                            }
-
-                            if (megabytesRead == megabytesToRead){
-                                break;
-                            }
-
-                        //}
+                        if (megabytesRead == megabytesToRead) {
+                            break;
+                        }
                     }
                 } finally {
 
@@ -139,5 +137,12 @@ public class App {
         long totalTimeSecs = (currentTimeMillis - startTimeMillis) / 1000;
         System.out.format("%n%n%s records read in %d seconds (%d records/second)", readCount, totalTimeSecs,
                 readCount / totalTimeSecs);
+
+        serverStatus = database.runCommand(dbObject);
+        network = (Document) serverStatus.get("network");
+        long physicalBytesOutEnd = network.getLong("physicalBytesOut");
+        double mbytesOut = ((double) (physicalBytesOutEnd - physicalBytesOutStart)) / (1000 * 1000);
+
+        System.out.format("%nMongoDB ServerReported Megabytes Out: %.3f MB%n", mbytesOut);
     }
 }

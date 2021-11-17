@@ -1,7 +1,7 @@
 export mongodbURI="mongodb://localhost:27017/test?"
-export target_read_dabase="sample_airbnb"
-export target_read_collection="listingsAndReviews"
-export compressor="zstd"   # Compressor - One of unset, "zstd", "snappy" or "zlib"
+export targetReadDatabase="sample_airbnb"
+export targetReadCollection="listingsAndReviews"
+export compressor=$1   # Compressor - One of unset, "zstd", "snappy" or "zlib"
 
 export megabytesToRead=10
 export recordBatchSize=100
