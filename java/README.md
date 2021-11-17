@@ -2,6 +2,25 @@
 
 A Java Example of [MongoDB Network Compression](../READ.md).
 
+An under-advertised feature of MongoDB is its ability to compress data between the client and the server. By default, data over the wire is compressed between replicaset nodes, but not between your client and the replicaset:
+
+![replicaset](../img/architecture.png)
+
+MongoDB supports the following compressors:
+
+* [snappy](https://docs.mongodb.com/manual/reference/glossary/#std-term-snappy)
+* [zlib](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 3.6)
+* [zstd](https://docs.mongodb.com/manual/reference/glossary/#std-term-zlib) (Available starting in MongoDB 4.2)
+
+Enabling compression from the [client](https://docs.mongodb.com/drivers/java/sync/current/fundamentals/connection/#compression) simply involves installing the desired compression library and then passing the compressor as an argument when you connect to MongoDB. For example:
+
+```Java
+ConnectionString connectionString = new ConnectionString("mongodb://localhost/?compressors=zstd");
+MongoClient mongoClient = MongoClients.create(connectionString);
+```
+
+This repository contains a tuneable Java program, [App.java](rsrc/main/java/com/mongodb/java/bootstrap/App.java), that you can use to see the impact of network compression yourself. 
+
 ## Setup
 Client Configuration
 
@@ -115,7 +134,7 @@ Batch read size: 100 records
 MongoDB ServerReported Megabytes Out: 6.811 MB
 ```
 
-With `zlib` compression configured at its default compression level, we were able to achieve a 65% reduction in network egress, while achieving the same read throuput as `snappy`.
+With `zlib` compression configured at its default compression level, we were able to achieve a 65% reduction in network egress, while achieving the same read throughput as `snappy`.
 
 Let's run a final test using `zstd`, which is advertised to bring together speed of `snappy` with the compression efficiency of `zlib`:
 
@@ -155,4 +174,18 @@ There are a couple of options for measuring network traffic. This script is usin
 Another option would be using a network analysis tool like [Wireshark](https://www.wireshark.org/). But that's beyond the scope of this article for now.
 
 Bottom line, compression reduces network traffic by more than `60%`. More importantly, compression also had a dramatic improvement on read performance. That's a Win-Win.
+
+# Verification
+If the verbosity level of the mongod log file is increased to include debug messages, you'll find messages in the log such as:
+
+```zsh
+{"t":{"$date":"2021-11-17T11:04:42.804-05:00"},"s":"D3", "c":"NETWORK",  "id":22927,   "ctx":"conn141","msg":"Decompressing message","attr":{"compressor":"zstd"}}
+```
+For a full summary of the message types, see the [Wire Compression in Drivers speficication](https://github.com/mongodb/specifications/blob/master/source/compression/OP_COMPRESSED.rst).
+
+See [db.setLogLevel()](https://docs.mongodb.com/manual/reference/method/db.setLogLevel/) for how to increase your log level. Use leve `3` to see the compression messages.
+
+
+_Note, it's currently not possible to set the log level in Atlas: [Unsupported Commands in M10+ Clusters](https://docs.atlas.mongodb.com/reference/unsupported-commands-paid-tier-clusters/). See [Support db.setLogLevel() in Atlas](https://feedback.mongodb.com/forums/924145-atlas/suggestions/44452887-support-db-setloglevel-in-atlas) for the feature request._
+
 
