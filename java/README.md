@@ -22,7 +22,7 @@ MongoClient mongoClient = MongoClients.create(connectionString);
 This repository contains a tuneable Java program, [App.java](rsrc/main/java/com/mongodb/java/bootstrap/App.java), that you can use to see the impact of network compression yourself. 
 
 ## Setup
-Client Configuration
+### Client Configuration
 
 Edit [run.sh](run.sh) and at a minimum, set your connection string. Other tunables include the namespace to read from and the amount of bytes to read (default 10 MB).
 
@@ -36,6 +36,31 @@ export compressor=$1   # Compressor - One of unset, "zstd", "snappy" or "zlib"
 
 export megabytesToRead=10
 ```
+### Dependency Management
+This example uses Maven. 
+
+`zlib` is included with in the Java library. 
+
+[Snappy-java](https://github.com/xerial/snappy-java}) is available from Maven's central repository. Add the following dependency to your pom.xml:
+
+```xml
+    <dependency>
+      <groupId>org.xerial.snappy</groupId>
+      <artifactId>snappy-java</artifactId>
+      <version>1.1.8.4</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+  ```
+[zstd](https://github.com/luben/zstd-jni) available from Maven's central repository. Add the following dependency to your pom.xml:
+
+```xml
+    <dependency>
+      <groupId>com.github.luben</groupId>
+      <artifactId>zstd-jni</artifactId>
+      <version>1.5.0-4</version>
+    </dependency>
+  ```
 
 ```Shell
 % mvn clean install
