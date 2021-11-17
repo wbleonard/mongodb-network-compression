@@ -19,7 +19,7 @@ ConnectionString connectionString = new ConnectionString("mongodb://localhost/?c
 MongoClient mongoClient = MongoClients.create(connectionString);
 ```
 
-This repository contains a tuneable Java program, [App.java](rsrc/main/java/com/mongodb/java/bootstrap/App.java), that you can use to see the impact of network compression yourself. 
+This repository contains a tuneable Java program, [App.java](src/main/java/com/mongodb/java/bootstrap/App.java), that you can use to see the impact of network compression yourself. 
 
 ## Setup
 ### Client Configuration
