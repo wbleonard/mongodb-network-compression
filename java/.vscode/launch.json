@@ -9,7 +9,9 @@
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}",
-            "env": { "mongodbURI":"mongodb://localhost:27017",
+            "env": { "mongodbURI":"mongodb://localhost:27017/test?",
+                   "target_read_dabase":"sample_airbnb",
+                   "target_read_collection":"listingsAndReviews",
                    "compressor":"zstd",
                    "megabytesToRead": 10,
                    "recordBatchSize":100}   
@@ -20,7 +22,7 @@
             "request": "launch",
             "mainClass": "com.mongodb.java.bootstrap.App",
             "projectName": "java-bootstrap",
-            "env":{"mongodb_uri":"mongodb://localhost:27017",
+            "env":{"mongodb_uri":"mongodb://localhost:27017test?retryWrites=true",
                 "compressor":"zlib",
                 "megabytesToRead": 10,
                 "recordBatchSize":100}      

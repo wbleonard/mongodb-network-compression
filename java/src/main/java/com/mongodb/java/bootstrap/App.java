@@ -33,8 +33,10 @@ public class App {
 
         // Grab the connection string from the environment:
         String uriString = System.getenv("mongodbURI");
+        String databaseString = System.getenv("target_read_dabase");
+        String collectionString = System.getenv("target_read_collection");
         String compressor = System.getenv("compressor");
-        int megaBytesToRead = Integer.parseInt(System.getenv("megabytesToRead"));
+        int megabytesToRead = Integer.parseInt(System.getenv("megabytesToRead"));
         int recordBatchSize = Integer.parseInt(System.getenv("recordBatchSize"));
 
         if (uriString == null) {
@@ -47,11 +49,10 @@ public class App {
             uriString = uriString + "&appName=Java Network Compress Test with no compressor";
         } else {
             System.out.format("%nNetwork Compression: " + compressor);
-            uriString = uriString + "&compressors=" + compressor + "&appName=Java Network Compress Test using Compressor " + compressor;
+            uriString = uriString + "&compressors=" + compressor
+                    + "&appName=Java Network Compress Test using Compressor " + compressor;
         }
 
-        String databaseString = "sample_analytics";
-        String collectionString = "customers";
         MongoDatabase database = null;
 
         com.mongodb.client.MongoClient mongoClient = MongoClients.create(uriString);
@@ -72,11 +73,11 @@ public class App {
         // https://mongodb.github.io/mongo-java-driver/4.4/apidocs/mongodb-driver-core/com/mongodb/MongoCompressor.html
 
         System.out.format("%n%nCollection to read from: %s.%s", databaseString, collectionString);
-        System.out.format("%nBytes to read: %s MB", megaBytesToRead);
+        System.out.format("%nBytes to read: %s MB", megabytesToRead);
         System.out.format("%nBatch read size: %s records\n", recordBatchSize);
 
         // Convert parameter to bytes
-        int bytesToRead = megaBytesToRead * 1000 * 1000;
+        int bytesToRead = megabytesToRead * 1000 * 1000;
         int bytesRead = 0;
         long previousMegabytesRead = 0;
         int readCount = 0; // Count the records read
@@ -88,8 +89,11 @@ public class App {
             try {
 
                 // Limit the read to the batch size for reporting.
-                MongoCursor<Document> cursor = collection.find().limit(recordBatchSize).batchSize(recordBatchSize)
-                        .iterator();
+                // MongoCursor<Document> cursor =
+                // collection.find().limit(recordBatchSize).batchSize(recordBatchSize)
+                // .iterator();
+
+                MongoCursor<Document> cursor = collection.find().iterator();
 
                 try {
                     while (cursor.hasNext()) {
@@ -100,22 +104,28 @@ public class App {
                         readCount++;
 
                         // If the modulus falls in the range of the batch size, report the results:
-                        // if (readCount % recordBatchSize == 0) {
-                        // print('{:.0f} megabytes read'.format(bytes_read/1000/1000), 'at {:.1f}
-                        // kilobytes/second'.format(bytes_read/duration/1000)
+                        //if (readCount % recordBatchSize == 0) {
+
+                            // But only print per megabyte read
+                            long currentTimeMillis = System.currentTimeMillis();
+                            long totalTimeMillis = currentTimeMillis - startTimeMillis;
+                            long megabytesRead = bytesRead / 1000 / 1000;
+
+                            if (megabytesRead > previousMegabytesRead) {
+                                double kilobytesRead = ((double) bytesRead / 1000);
+                                double kilobytesPerSecond = ((double) (kilobytesRead / ((double) totalTimeMillis / 1000)));
+                                System.out.format("%n%d megabytes read at %.3f kilobytes/second", megabytesRead, kilobytesPerSecond);
+                                previousMegabytesRead = megabytesRead;
+                            }
+
+                            if (megabytesRead == megabytesToRead){
+                                break;
+                            }
+
+                        //}
                     }
                 } finally {
 
-                    // Print performance stats
-                    long currentTimeMillis = System.currentTimeMillis();
-                    long totalTimeSecs = (currentTimeMillis - startTimeMillis)/1000;
-                    long megabytesRead = bytesRead / 1000 / 1000;
-
-                    if (megabytesRead > previousMegabytesRead) {
-                        float rate = ((float) bytesRead/totalTimeSecs/1000/1000);
-                        System.out.format("%n%d megabytes read at %.3f kilobytes/second", megabytesRead, rate );
-                        previousMegabytesRead = megabytesRead;
-                    }
                     cursor.close();
                 }
 
@@ -126,7 +136,8 @@ public class App {
         }
 
         long currentTimeMillis = System.currentTimeMillis();
-        long totalTimeSecs = (currentTimeMillis - startTimeMillis)/1000;
-        System.out.format("%n%n%s records read in %d seconds (%d records/second)", readCount, totalTimeSecs, readCount/totalTimeSecs);
+        long totalTimeSecs = (currentTimeMillis - startTimeMillis) / 1000;
+        System.out.format("%n%n%s records read in %d seconds (%d records/second)", readCount, totalTimeSecs,
+                readCount / totalTimeSecs);
     }
 }
