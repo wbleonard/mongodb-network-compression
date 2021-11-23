@@ -39,6 +39,8 @@ public class App {
         String compressor = System.getenv("compressor");
         int megabytesToRead = Integer.parseInt(System.getenv("megabytesToRead"));
         int recordBatchSize = Integer.parseInt(System.getenv("recordBatchSize"));
+        int reportBatchSizeMB = Integer.parseInt(System.getenv("reportBatchSizeMB"));
+        long reportBatchSizeBytes = reportBatchSizeMB * 1000 * 1000;
 
         if (uriString == null) {
             System.out.format("%nMongoDB Connection String environment variable, 'mongodbURI', is not set");
@@ -79,22 +81,15 @@ public class App {
         System.out.format("%nBatch read size: %s records\n", recordBatchSize);
 
         // Convert parameter to bytes
-        int bytesToRead = megabytesToRead * 1000 * 1000;
-        int bytesRead = 0;
-        long previousMegabytesRead = 0;
+        long bytesToRead = (long) megabytesToRead * 1000 * 1000;
+        long bytesRead = 0;
         int readCount = 0; // Count the records read
 
         while (bytesRead < bytesToRead) {
 
-            // readCount = 0; // Rest the read count for each batch
-
             try {
 
                 // Limit the read to the batch size for reporting.
-                // MongoCursor<Document> cursor =
-                // collection.find().limit(recordBatchSize).batchSize(recordBatchSize)
-                // .iterator();
-                // MongoCursor<Document> cursor = collection.find().batchSize(recordBatchSize).iterator();
                 MongoCursor<Document> cursor = collection.find().iterator();
 
                 try {
@@ -108,17 +103,21 @@ public class App {
                         // But only print per megabyte read
                         long currentTimeMillis = System.currentTimeMillis();
                         long totalTimeMillis = currentTimeMillis - startTimeMillis;
-                        long megabytesRead = bytesRead / 1000 / 1000;
+                        double megabytesRead = bytesRead / 1000 / 1000;
 
-                        if (megabytesRead > previousMegabytesRead) {
-                            double kilobytesRead = ((double) bytesRead / 1000);
-                            double kilobytesPerSecond = ((double) (kilobytesRead / ((double) totalTimeMillis / 1000)));
-                            System.out.format("%n%d megabytes read at %.3f kilobytes/second", megabytesRead,
-                                    kilobytesPerSecond);
-                            previousMegabytesRead = megabytesRead;
+                        // Since we're reporting on bytes, we report when the bytes read falls w/ our report 
+                        // batch size, plus or minus the record size.
+                        long modulus = bytesRead % reportBatchSizeBytes;
+                        if ((modulus >= (0-recordSize)) && (modulus <= (0+recordSize))) {
+                            //double kilobytesRead = ((double) bytesRead / 1000);
+                            //double kilobytesPerSecond = ((double) (kilobytesRead / ((double) totalTimeMillis / 1000)));
+                            double megabytesPerSecond = ((double) (megabytesRead / ((double) totalTimeMillis / 1000)));
+                            System.out.format("%n%.0f megabytes read at %.3f megabytes/second", megabytesRead,
+                                    megabytesPerSecond);
                         }
 
                         if (megabytesRead == megabytesToRead) {
+                            System.out.format("%n%d megabytes read = %d megabytes to read", megabytesRead, megabytesToRead);
                             break;
                         }
                     }

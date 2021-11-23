@@ -13,8 +13,10 @@
                    "targetReadDatabase":"sample_airbnb",
                    "targetReadCollection":"listingsAndReviews",
                    "compressor":"zstd",
-                   "megabytesToRead": 10,
-                   "recordBatchSize":100}   
+                   "megabytesToRead": 10000,
+                   "reportBatchSizeMB": 100,
+                   "recordBatchSize":100,
+                }   
         },
         {
             "type": "java",

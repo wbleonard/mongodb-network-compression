@@ -41,7 +41,7 @@ This example uses Maven.
 
 `zlib` is included with in the Java library. 
 
-[Snappy-java](https://github.com/xerial/snappy-java) is available from Maven's central repository. Add the following dependency to your pom.xml:
+[Snappy-java](https://github.com/xerial/snappy-java`) is available from Maven's central repository. Add the following dependency to your pom.xml:
 
 ```xml
     <dependency>
