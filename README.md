@@ -21,7 +21,7 @@ client = MongoClient('mongodb://localhost', compressors='zstd')
 ```
 
 
-This repository contains two tuneable Python scripts, [read-from-mongo.py](read-from-mongo.py) and [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. The scripts pull their data from the `network` propert of the [db.serverStatus()](https://www.mongodb.com/docs/manual/reference/method/db.serverStatus/) command:
+This repository contains two tuneable Python scripts, [read-from-mongo.py](read-from-mongo.py) and [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. The scripts pull their data from the `network` property of the [db.serverStatus()](https://www.mongodb.com/docs/manual/reference/method/db.serverStatus/) command:
 
 ```JavaScript
 db.serverStatus().network
