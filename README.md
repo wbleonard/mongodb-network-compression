@@ -1,6 +1,10 @@
 # MongoDB Network Compression: A Win-Win
 
-An under-advertised feature of MongoDB is its ability to compress data between the client and the server. The CRM company Close has a really [nice article](https://making.close.com/posts/mongodb-network-compression) on how compression reduced their network traffic from about 140 Mbps to 65 Mpbs. As Close notes, with cloud data transfer costs ranging from $0.01 per GB and up, you can get a nice little savings with a simple configuration change. 
+An under-advertised feature of MongoDB is its ability to compress data between the client and the server. By default, data over the wire is compressed between replicaset nodes, but not between your client and the replicaset:
+
+![replicaset](./img/architecture.png)
+
+The CRM company Close has a really [nice article](https://making.close.com/posts/mongodb-network-compression) on how compression reduced their network traffic from about 140 Mbps to 65 Mpbs. As Close notes, with cloud data transfer costs ranging from $0.01 per GB and up, you can get a nice little savings with a simple configuration change. 
 
 ![mongodb-network-compression-chart](img/mongodb-network-compression-chart.webp)
 
@@ -17,7 +21,39 @@ client = MongoClient('mongodb://localhost', compressors='zstd')
 ```
 
 
-This repository contains two tuneable Python scripts, [read-from-mongo.py](read-from-mongo.py) and [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. 
+This repository contains two tuneable Python scripts, [read-from-mongo.py](read-from-mongo.py) and [write-to-mongo.py](write-to-mongo.py), that you can use to see the impact of network compression yourself. The scripts pull their data from the `network` propert of the [db.serverStatus()](https://www.mongodb.com/docs/manual/reference/method/db.serverStatus/) command:
+
+```JavaScript
+db.serverStatus().network
+{
+  bytesIn: Long("276555533"),
+  bytesOut: Long("2172551909"),
+  physicalBytesIn: Long("158645659"),
+  physicalBytesOut: Long("1451458669"),
+  numSlowDNSOperations: Long("0"),
+  numSlowSSLOperations: Long("0"),
+  numRequests: Long("611797"),
+  tcpFastOpen: {
+    kernelSetting: Long("0"),
+    serverSupported: true,
+    clientSupported: false,
+    accepted: Long("0")
+  },
+  compression: {
+    snappy: {
+      compressor: { bytesIn: Long("351786031"), bytesOut: Long("217301191") },
+      decompressor: { bytesIn: Long("73430495"), bytesOut: Long("149034178") }
+    },
+    zstd: {
+      compressor: { bytesIn: Long("0"), bytesOut: Long("0") },
+      decompressor: { bytesIn: Long("0"), bytesOut: Long("0") }
+    },
+    zlib: {
+      compressor: { bytesIn: Long("909718996"), bytesOut: Long("319762999") },
+      decompressor: { bytesIn: Long("109890"), bytesOut: Long("123176") }
+    }
+  },
+  ```
 
 ## Setup
 
